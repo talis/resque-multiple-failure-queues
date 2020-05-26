@@ -11,6 +11,7 @@ namespace Talis\Resque\Failure;
  */
 class RedisMultipleQueues implements \Resque_Failure_Interface
 {
+    const FAILED_SUFFIX = '_failed';
     /**
      * Initialize a failed job class and save it (where appropriate).
      *
@@ -30,8 +31,8 @@ class RedisMultipleQueues implements \Resque_Failure_Interface
         $data->worker = (string)$worker;
         $data->queue = $queue;
         $data = json_encode($data);
-        \Resque::redis()->rpush($queue . '_failed', $data);
-        \Resque::redis()->sadd('failed_queues', $queue . '_failed');
-        \Resque_Stat::incr($queue . '_failed');
+        \Resque::redis()->rpush($queue . self::FAILED_SUFFIX, $data);
+        \Resque::redis()->sadd('failed_queues', $queue . self::FAILED_SUFFIX);
+        \Resque_Stat::incr($queue . self::FAILED_SUFFIX);
     }
 }
