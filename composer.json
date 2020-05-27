@@ -14,7 +14,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Talis\\": "src/"
+            "Talis\\Resque\\Failure\\": "src/"
         }
     }
 }
