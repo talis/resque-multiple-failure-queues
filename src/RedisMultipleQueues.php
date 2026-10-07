@@ -2,6 +2,10 @@
 
 namespace Talis\Resque\Failure;
 
+use Resque\Failure\FailureInterface;
+use Resque\Resque;
+use Resque\Stat;
+
 /**
  * Redis backend for storing failed Resque jobs.
  *
@@ -9,7 +13,7 @@ namespace Talis\Resque\Failure;
  * @author      Omar Qureshi <oq@talis.com>
  * @license     http://www.opensource.org/licenses/mit-license.php
  */
-class RedisMultipleQueues implements \Resque_Failure_Interface
+class RedisMultipleQueues implements FailureInterface
 {
     const FAILED_SUFFIX = '_failed';
     /**
@@ -23,7 +27,7 @@ class RedisMultipleQueues implements \Resque_Failure_Interface
     public function __construct($payload, $exception, $worker, $queue)
     {
         $data = new \stdClass();
-        $data->failed_at = strftime('%a %b %d %H:%M:%S %Z %Y');
+        $data->failed_at = date("c");
         $data->payload = $payload;
         $data->exception = get_class($exception);
         $data->error = $exception->getMessage();
@@ -31,8 +35,8 @@ class RedisMultipleQueues implements \Resque_Failure_Interface
         $data->worker = (string)$worker;
         $data->queue = $queue;
         $data = json_encode($data);
-        \Resque::redis()->rpush($queue . self::FAILED_SUFFIX, $data);
-        \Resque::redis()->sadd('failed_queues', $queue . self::FAILED_SUFFIX);
-        \Resque_Stat::incr($queue . self::FAILED_SUFFIX);
+        Resque::redis()->rpush($queue . self::FAILED_SUFFIX, $data);
+        Resque::redis()->sadd('failed_queues', $queue . self::FAILED_SUFFIX);
+        Stat::incr($queue . self::FAILED_SUFFIX);
     }
 }
